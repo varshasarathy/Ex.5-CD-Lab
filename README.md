@@ -1,7 +1,7 @@
 # Ex.No:5
 # RECOGNITION OF THE GRAMMAR(a^nb where n>=10) USING YACC
 ## Register Number: 212223040233
-## Date:27-04-02-2025
+## Date:27-04-2025
 ## AIM:
 To write a YACC program to recognize the grammar a^nb where n>=10.
 ## ALGORITHM:
@@ -14,55 +14,81 @@ To write a YACC program to recognize the grammar a^nb where n>=10.
 7.	Compile these with the C compiler as gcc lex.yy.c y.tab.c
 8.	Enter a string as input and it is identified as valid or invalid.
 ## PROGRAM:
+
+## anb.l
+
 ```
-// EXP5.l file
 %{
-/* Definition section */ #include "y.tab.h"
+#include "expr5.tab.h"
 %}
 
-/* Rule Section */
-%%
-[aA] {return A;}
-[bB] {return B;}
-\n {return NL;}
-. {return yytext[0];}
 %%
 
-int yywrap()
-{
-return 1;
+a       { return A; }
+b       { return B; }
+\n      { return '\n'; }
+.       { return INVALID; }
+
+%%
+int yywrap() {
+    return 1;
 }
-// EXP5.y file
 
+```
+
+## anb.y
+
+```
 %{
-/* Definition section */
-#include<stdio.h> 
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int count = 0;  // count of 'a's
+int yylex(void);
+void yyerror(const char *s);
 %}
 
-%token A B NL
+%token A B INVALID
 
-/* Rule Section */
-%%
-stmt: S NL { printf("valid string\n");
-exit(0); }
-;
-S: A S B |;
 %%
 
-int yyerror(char *msg)
-{
-printf("invalid string\n"); exit(0);
+input:
+    A_seq B '\n' {
+        if (count >= 10) {
+            printf("Valid string: a^n b where n >= 10\n");
+        } else {
+            printf("Invalid: less than 10 'a's before 'b'\n");
+        }
+        count = 0; // reset for next input
+    }
+  | INVALID '\n' {
+        printf("Invalid character in input.\n");
+        count = 0;
+    }
+  ;
+
+A_seq:
+    A           { count = 1; }
+  | A_seq A     { count++; }
+  ;
+
+%%
+
+int main() {
+    printf("Enter strings (e.g., aaa...ab), one per line (Ctrl+D to quit):\n");
+    while (yyparse() == 0);
+    return 0;
 }
-int main()
-{
-printf("enter the string\n"); yyparse();
+
+void yyerror(const char *s) {
+    // Errors handled in grammar
 }
+
 
 ```
 ## OUTPUT:
 
-![384919537-0ad9fbad-420d-40ac-85f0-abfbe3b2c634](https://github.com/user-attachments/assets/c7c343a1-0bbf-4de3-8b85-9d242c1acb4f)
+![image](https://github.com/user-attachments/assets/ba76c269-f2a6-43db-bc3a-981606b240b9)
 
 ## RESULT:
 The YACC program to recognize the grammar anb where n>=10 is executed successfully and the output is verified.
